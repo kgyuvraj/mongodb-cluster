@@ -1,0 +1,7 @@
+---
+- name: Create user on a linux server
+  become: yes
+  hosts: server1, server2, server3
+  gather_facts: false
+  roles:
+    - mongodbrole
