@@ -17,12 +17,6 @@
   file:
     path: /SM/mongodb/key-file
     state: directory
-  #- name: copy configuration file with authentication parameters
-  # copy:
-  # src: mongod.conf
-  # dest: /SM/mongodb/mongod.conf.orig
-  # mode: 0644
-
 
 - name: copy configuration file with authentication parameters
   become: true
@@ -31,25 +25,11 @@
     dest: /SM/mongodb/mongod.conf.orig
     mode: 0644
 
-  #- name: copy security key file to nodes
-  # become: true
-  # copy:
-  # src: mongodb-keyfile
-  # dest: /SM/mongodb/mongodb-keyfile
-  # mode: 0600
-
 - name: copy security key file to nodes
   copy:
     src: mongodb-keyfile
     dest: /SM/mongodb/key-file/mongodb-keyfile
     mode: 0600
-
-  #- name: change access right of key file
-  # file:
-  # path: /SM/mongodb/key-file/mongodb-keyfile
-  # state: file
-  # owner: root
-  # group: root
 
 - name: permission
   command: chown 999:999 /SM/mongodb/key-file/mongodb-keyfile
@@ -71,7 +51,6 @@
       MONGO_INITDB_ROOT_USERNAME=test
       MONGO_INITDB_ROOT_PASSWORD=test@123
       MONGO_INITDB_MAX_SERVER_SELECTION_TIMEOUT=60000
-# command: --replSet "mongoSet"
     command: --replSet "mongoSet" --keyFile /etc/mongodb-keyfile
   delegate_to: "{{ item }}"
   with_items: "{{ groups['server1'] }}"
@@ -94,7 +73,6 @@
       MONGO_INITDB_ROOT_USERNAME=test
       MONGO_INITDB_ROOT_PASSWORD=test@123
       MONGO_INITDB_MAX_SERVER_SELECTION_TIMEOUT=60000
-    # command: --replSet "mongoSet"
     command: --replSet "mongoSet" --keyFile /etc/mongodb-keyfile
   delegate_to: "{{ item }}"
   with_items: "{{ groups['server2'] }}"
@@ -118,7 +96,6 @@
       MONGO_INITDB_ROOT_USERNAME=test
       MONGO_INITDB_ROOT_PASSWORD=test@123
       MONGO_INITDB_MAX_SERVER_SELECTION_TIMEOUT=60000
-    # command: --replSet "mongoSet"
     command: --replSet "mongoSet" --keyFile /etc/mongodb-keyfile
   delegate_to: "{{ item }}"
   with_items: "{{ groups['server3'] }}"
