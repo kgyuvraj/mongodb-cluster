@@ -1,0 +1,124 @@
+---
+# tasks file for mongodbrole
+- name: "Create a network"
+  docker_network:
+    name: "mongoNet"
+    
+- name: Install pymongo python package
+  ansible.builtin.pip:
+    name: pymongo
+
+- name: Creates directory
+  file:
+    path: /SM/mongodb
+    state: directory
+    
+- name: Creates directory
+  file:
+    path: /SM/mongodb/key-file
+    state: directory
+  #- name: copy configuration file with authentication parameters
+  # copy:
+  # src: mongod.conf
+  # dest: /SM/mongodb/mongod.conf.orig
+  # mode: 0644
+
+
+- name: copy configuration file with authentication parameters
+  become: true
+  copy:
+    src: mongod.conf
+    dest: /SM/mongodb/mongod.conf.orig
+    mode: 0644
+
+  #- name: copy security key file to nodes
+  # become: true
+  # copy:
+  # src: mongodb-keyfile
+  # dest: /SM/mongodb/mongodb-keyfile
+  # mode: 0600
+
+- name: copy security key file to nodes
+  copy:
+    src: mongodb-keyfile
+    dest: /SM/mongodb/key-file/mongodb-keyfile
+    mode: 0600
+
+  #- name: change access right of key file
+  # file:
+  # path: /SM/mongodb/key-file/mongodb-keyfile
+  # state: file
+  # owner: root
+  # group: root
+
+- name: permission
+  command: chown 999:999 /SM/mongodb/key-file/mongodb-keyfile
+
+- name: Add container to networks
+  docker_container:
+    name: m1
+    image: "{{ container1_image }}"
+    networks:
+      - name: mongoNet
+    restart_policy: always
+    ports:
+      - "27017:27017"
+    volumes:
+      - "/SM/mongodb/mongod.conf.orig:/etc/mongod.conf.orig"
+      - "/SM/mongodb/key-file/mongodb-keyfile:/etc/mongodb-keyfile"
+      - "/SM/mongodb/m1:/data/db"
+    env:
+      MONGO_INITDB_ROOT_USERNAME=test
+      MONGO_INITDB_ROOT_PASSWORD=test@123
+      MONGO_INITDB_MAX_SERVER_SELECTION_TIMEOUT=60000
+# command: --replSet "mongoSet"
+    command: --replSet "mongoSet" --keyFile /etc/mongodb-keyfile
+  delegate_to: "{{ item }}"
+  with_items: "{{ groups['server1'] }}"
+
+
+- name: Add container to networks
+  docker_container:
+    name: m2
+    image: "{{ container2_image }}"
+    networks:
+      - name: mongoNet
+    restart_policy: always
+    ports:
+      - "27017:27017"
+    volumes:
+      - "/SM/mongodb/mongod.conf.orig:/etc/mongod.conf.orig"
+      - "/SM/mongodb/key-file/mongodb-keyfile:/etc/mongodb-keyfile"
+      - "/SM/mongodb/m2:/data/db"
+    env:
+      MONGO_INITDB_ROOT_USERNAME=test
+      MONGO_INITDB_ROOT_PASSWORD=test@123
+      MONGO_INITDB_MAX_SERVER_SELECTION_TIMEOUT=60000
+    # command: --replSet "mongoSet"
+    command: --replSet "mongoSet" --keyFile /etc/mongodb-keyfile
+  delegate_to: "{{ item }}"
+  with_items: "{{ groups['server2'] }}"
+
+
+
+- name: Add container to networks
+  docker_container:
+    name: m3
+    image: "{{ container3_image }}"
+    networks:
+      - name: mongoNet
+    restart_policy: always
+    ports:
+      - "27017:27017"
+    volumes:
+      - "/SM/mongodb/mongod.conf.orig:/etc/mongod.conf.orig"
+      - "/SM/mongodb/key-file/mongodb-keyfile:/etc/mongodb-keyfile"
+      - "/SM/mongodb/m3:/data/db"
+    env:
+      MONGO_INITDB_ROOT_USERNAME=test
+      MONGO_INITDB_ROOT_PASSWORD=test@123
+      MONGO_INITDB_MAX_SERVER_SELECTION_TIMEOUT=60000
+    # command: --replSet "mongoSet"
+    command: --replSet "mongoSet" --keyFile /etc/mongodb-keyfile
+  delegate_to: "{{ item }}"
+  with_items: "{{ groups['server3'] }}"
