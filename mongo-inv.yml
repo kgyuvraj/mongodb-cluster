@@ -1,0 +1,6 @@
+[server1]
+10.0.1.1 ansible_ssh_user=test ansible_ssh_pass=test@123
+[server2]
+10.0.1.2 ansible_ssh_user=test ansible_ssh_pass=test@123
+[server3]
+10.0.1.3 ansible_ssh_user=test ansible_ssh_pass=test@123
